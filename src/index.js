@@ -1,28 +1,29 @@
 import React from 'react';
 import {render} from 'react-dom';
 import {Router, Route, browserHistory, IndexRoute} from 'react-router';
-
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Layout from './components/Layout';
-import Search from './components/Search';
-import Favorites from './components/Favorites';
+import AddData from './components/AddData';
 import Landing from './components/Landing';
-import Results from './components/Results';
-
-import './stores/FriendStore';
+import Data from './components/Data';
+import Details from './components/Details';
 
 render(
+<MuiThemeProvider>
+
   <div>
     <div id='background'></div>
     <div id='content'>
       <Router history={browserHistory}>
         <Route path='/' component={Layout}>
           <IndexRoute component={Landing} />
-          <Route path='/search' component={Search} />
-          <Route path='/results' component={Results} />
-          <Route path='/favorites' component={Favorites} />
+          <Route path='/adddata' component={AddData} />
+          <Route path='/viewdata' component={Data} />
+          <Route path='/details' component={Details} />
         </Route>
       </Router>
     </div>
-  </div>,
+  </div>
+</MuiThemeProvider>,
   document.getElementById('root')
 );

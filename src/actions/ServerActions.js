@@ -1,16 +1,27 @@
 import AppDispatcher from '../AppDispatcher';
 
 const ServerActions = {
-  receivePicAnalysis (data) {
+  gotAnimals (data) {
+    console.log('in ServerActions');
     AppDispatcher.dispatch({
-      type: 'PICTURE_ANALYSIS',
+      type: 'GOT_ANIMALS',
       payload: {data}
     });
   },
 
-  receiveMsgAnalysis (data) {
+  gotClients (data) {
+    console.log('in ServerActions');
     AppDispatcher.dispatch({
-      type: 'MESSAGE_ANALYSIS',
+      type: 'GOT_CLIENTS',
+      payload: {data}
+    });
+  },
+
+  gotDetails (data) {
+    console.log('in ServerActions');
+    console.log('data: ', data)
+    AppDispatcher.dispatch({
+      type: 'GOT_DETAILS',
       payload: {data}
     });
   },

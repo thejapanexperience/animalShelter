@@ -1,112 +1,106 @@
 import ServerActions from './actions/ServerActions';
 import axios from 'axios';
-const io = require('socket.io-client')
-let socket;
-let untilClose;
 
 const API = {
-  initializeFavorites () {
-    axios.get('http://localhost:8000/managefavorites')
+
+  submitBoth (animal, client) {
+    console.log('in API');
+    console.log('animal: ', animal)
+    axios.post(`http://localhost:8000/api/animal`,{animal})
       .then((res) => {
-        console.log('API INITIALIZE:', res.data);
-        ServerActions.updateFavorites(parseFavorites(res.data));
+        console.log('res.data: ', res.data)
+        ServerActions.gotAnimals(res.data)
+        console.log('client in API before post: ', client)
+        return axios.post(`http://localhost:8000/api/client`,{client})
+      })
+      .then(res => {
+        console.log('res.data: ', res.data)
+        ServerActions.gotClients(res.data)
       })
       .catch((err) => {
-        console.error('INITIALIZE FAVORITES:', err);
+        console.error('Error:', err);
       });
   },
 
-  openSocket () {
-    socket = io.connect('http://localhost:8000');
-    socket.on('watson', function (data) {
-      // console.log('WATSON:', data);
-      ServerActions.receiveMsgAnalysis(data);
-      untilClose--;
-      if (untilClose < 1) {
-        socket.disconnect();
-        console.log('SOCKET CLOSED');
-      }
-    });
-
-    socket.on('microsoft', function(data) {
-      // console.log('MICROSOFT:', data);
-      ServerActions.receivePicAnalysis(data);
-      untilClose--;
-      if (untilClose < 1) {
-        socket.disconnect();
-        console.log('SOCKET CLOSED');
-      }
+  getBoth(){
+    axios.get(`http://localhost:8000/api/animal`)
+    .then((res) => {
+      ServerActions.gotAnimals(res.data)
+      return axios.get(`http://localhost:8000/api/client`)
+    })
+    .then((res) => {
+      ServerActions.gotClients(res.data)
+    })
+    .catch((err) => {
+      console.error('SEARCH:', err);
     });
   },
 
-  search (pics, msgs) {
-    untilClose = pics.length + msgs.length;
+  getAnimals(){
+    axios.get(`http://localhost:8000/api/animal`)
+    .then((res) => {
+      ServerActions.gotAnimals(res.data)
+    })
+    .catch((err) => {
+      console.error('SEARCH:', err);
+    });
+  },
 
-    axios.post(`http://localhost:8000/api/search`,{pics, msgs})
+  seeNames(){
+    axios.get(`http://localhost:8000/api/animalowners`)
+    .then((res) => {
+      ServerActions.gotAnimals(res.data)
+    })
+    .catch((err) => {
+      console.error('SEARCH:', err);
+    });
+  },
+
+  submitAnimal (animal) {
+    console.log('in API');
+    console.log('animal: ', animal)
+    axios.post(`http://localhost:8000/api/animal`,{animal})
       .then((res) => {
-        console.log('API SEARCH:', res.data);
+        ServerActions.gotAnimals(res.data)
       })
       .catch((err) => {
         console.error('SEARCH:', err);
       });
   },
 
-  postFavorite (favorite) {
-    axios.post('http://localhost:8000/managefavorites', favorite)
-      .then((res) => {
-        console.log('API POST:', res.data);
-        ServerActions.updateFavorites(parseFavorites(res.data));
-      })
-      .catch((err) => {
-        console.error('POST FAVORITE:', err);
-      });
-  },
-
-  deleteFavorite (id) {
-    axios.delete(`http://localhost:8000/managefavorites?id=${encodeURI(id)}`)
-      .then((res) => {
-        console.log('API DELETE:', res.data);
-        ServerActions.updateFavorites(parseFavorites(res.data));
-      })
-      .catch((err) => {
-        console.error('DELETE FAVORITE:', err);
-      });
-  },
-
-  sendMail(address, data) {
-    console.log('address: ', address)
-    axios.post('http://localhost:8000/mail',{
-      to: address,
-      data: data,
+  getClients(){
+    axios.get(`http://localhost:8000/api/client`)
+    .then((res) => {
+      ServerActions.gotClients(res.data)
     })
+    .catch((err) => {
+      console.error('SEARCH:', err);
+    });
   },
 
-  getBusiness (id) {
-    axios.get(`http://localhost:8000/business?id=${id}`)
+  getDetails(id){
+    console.log('id: ', id)
+    axios.get(`http://localhost:8000/api/clientdetails/${id}`)
+    .then((res) => {
+      ServerActions.gotDetails(res.data)
+    })
+    .catch((err) => {
+      console.error('SEARCH:', err);
+    });
+  },
+
+  submitClient (client) {
+    console.log('in API');
+    console.log('client: ', client)
+    axios.post(`http://localhost:8000/api/client`,{client})
       .then((res) => {
-        console.log('API BUSINESS:', res.data);
-        ServerActions.recieveBusiness(res.data);
+        ServerActions.gotClients(res.data)
       })
       .catch((err) => {
-        console.error('GET BUSINESS:', err);
+        console.error('SEARCH:', err);
       });
   },
 
-  startStream (term, count, radius) {
-    axios.get(`http://localhost:8000/search/live?term=${encodeURI(term)}&count=${count}&radius=${radius}`);
-  }
-};
-
-function parseFavorites(favorites) {
-  return favorites.map(favorite => {
-    let obj = null;
-    try{
-      obj = JSON.parse(favorite.obj);
-    } catch (err) {
-      console.log('JSON PARSE FAVORITES ERROR: ', err);
-    }
-    return obj;
-  });
 }
 
 export default API;
